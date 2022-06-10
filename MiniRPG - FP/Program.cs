@@ -112,7 +112,7 @@ namespace MiniRPG
                 else if (gameEvent == -3)
                 {
                     closeConsole("========================================== " +
-                                 "Bravo ! Vous avez atteint le dernier niveau et complété le jeu, c'est la FIN DE LA PARTIE.\nMerci d'avoir joué.");
+                                 "\nBravo ! Vous avez atteint le dernier niveau et complété le jeu, c'est la FIN DE LA PARTIE.\nMerci d'avoir joué.");
                 }
             } while (running);
         }
