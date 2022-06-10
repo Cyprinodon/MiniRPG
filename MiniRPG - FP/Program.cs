@@ -1,49 +1,14 @@
 ﻿using System;
+using MiniRPG.Game;
 
 namespace MiniRPG
 {
     class GameFP
     {
-        const string GAME_TITLE = "MiniRPG";
-        const string AUTHOR = "Dimitri GRABETTE";
-
-        public enum Gender { Male, Female }
-        public enum Phase { Combat, Rest }
-
-        public enum HeroText { Name, Title, Genre }
-        public enum Hero { Level, Hp, MaxHp, Power, Gold, Potions, Xp, LevelThreshold }
-
-        public enum Monster { Name, Hp, Power, GoldLoot, XpLoot }
-
-        public enum Combat { SeeStats, Attack, DrinkPotion, Flee, Quit };
-        public enum Rest { SeeStats, Sleep, BuyPotion, Quit };
-
-        const string DEFAULT_MALE_NAME = "Le Vaillant Prince";
-        const string DEFAULT_MALE_TITLE = "vaillant prince";
-
-        const string DEFAULT_FEMALE_NAME = "La Vaillante Princesse";
-        const string DEFAULT_FEMALE_TITLE = "vaillante princesse";
-
-        const int HERO_STARTING_LEVEL = 1;
-        const int HERO_STARTING_HP = 70;
-        const int HERO_STARTING_POWER = 10;
-        const int HERO_STARTING_GOLD = 0;
-        const int HERO_STARTING_POTIONS = 1;
-        const int HERO_STARTING_XP = 0;
-        const int HERO_MAX_LEVEL = 10;
-
-        const int HERO_MAX_HP_INCREASE = 15;
-        const int HERO_POWER_INCREASE = 5;
-
-        const int XP_LOSS_STRENGTH = 6;
-        const double SLEEP_HEALING_RATIO = 0.33f;
-        const int POTION_PRICE = 50;
-        const double POTION_POTENCY = 1; // 0 = aucun soin, 1 = soin total
-
-        const int MAX_CONSECUTIVE_BATTLES = 5;
-
         static void Main(string[] args)
         {
+            Data data = new Data();
+
             //L'expérience à accumuler pour atteindre chaque niveau
             int[] levelsThresholds = new int[]
             {
@@ -60,37 +25,37 @@ namespace MiniRPG
 
             bool running = true;
 
-            Phase phase = Phase.Combat;
+            Data.Phase phase = Data.Phase.Combat;
 
-            Console.Title = $"{GAME_TITLE} - Un jeu par {AUTHOR}";
+            Console.Title = $"{data.GAME_TITLE} - Un jeu par {data.AUTHOR}";
 
-            heroText = introduceHero();
-            int levelIndex = HERO_STARTING_LEVEL - 1 == 0 ? 0 : HERO_STARTING_LEVEL - 1;
+            heroText = introduceHero(data);
+            int levelIndex = data.HERO_STARTING_LEVEL - 1 == 0 ? 0 : data.HERO_STARTING_LEVEL - 1;
             nextLevelThreshold = levelsThresholds[levelIndex];
 
             hero = new int[8];
-            hero[(int)Hero.Level] = HERO_STARTING_LEVEL;
-            hero[(int)Hero.Hp] = HERO_STARTING_HP;
-            hero[(int)Hero.MaxHp] = HERO_STARTING_HP;
-            hero[(int)Hero.Power] = HERO_STARTING_POWER;
-            hero[(int)Hero.Gold] = HERO_STARTING_GOLD;
-            hero[(int)Hero.Potions] = HERO_STARTING_POTIONS;
-            hero[(int)Hero.Xp] = HERO_STARTING_XP;
-            hero[(int)Hero.LevelThreshold] = nextLevelThreshold;
+            hero[(int)Data.Hero.Level] = data.HERO_STARTING_LEVEL;
+            hero[(int)Data.Hero.Hp] = data.HERO_STARTING_HP;
+            hero[(int)Data.Hero.MaxHp] = data.HERO_STARTING_HP;
+            hero[(int)Data.Hero.Power] = data.HERO_STARTING_POWER;
+            hero[(int)Data.Hero.Gold] = data.HERO_STARTING_GOLD;
+            hero[(int)Data.Hero.Potions] = data.HERO_STARTING_POTIONS;
+            hero[(int)Data.Hero.Xp] = data.HERO_STARTING_XP;
+            hero[(int)Data.Hero.LevelThreshold] = nextLevelThreshold;
 
             do
             {
                 switch (phase)
                 {
-                    case Phase.Combat:
+                    case Data.Phase.Combat:
                         // Gestion des combats :
-                        hero = manageCombatPhase(heroText, hero);
+                        hero = manageCombatPhase(heroText, hero, data);
                         // Si le tableau récupéré ne contient qu'une valeur, c'est qu'il s'est passé quelque chose.
-                        phase = Phase.Rest;
+                        phase = Data.Phase.Rest;
                         break;
-                    case Phase.Rest:
-                        hero = manageRestPhase(heroText, hero, levelsThresholds);
-                        phase = Phase.Combat;
+                    case Data.Phase.Rest:
+                        hero = manageRestPhase(heroText, hero, levelsThresholds, data);
+                        phase = Data.Phase.Combat;
                         break;
                 }
 
@@ -266,7 +231,7 @@ namespace MiniRPG
             string playerTitle;
             bool confirmed;
 
-            if (gender == (int)Gender.Female)
+            if (gender == (int)Data.Gender.Female)
             {
                 playerTitle = "héroïne";
             }
@@ -298,7 +263,7 @@ namespace MiniRPG
                - playerName -> Nom saisi par le joueur
                - playerTitle -> Titre honorifique du joueur
                - playerGender -> Sexe choisi par le joueur */
-        public static string[] introduceHero()
+        public static string[] introduceHero(Data data)
         {
             string playerGender;
             int genderIndex;
@@ -321,14 +286,14 @@ namespace MiniRPG
 
             switch (genderIndex)
             {
-                case (int)Gender.Female:
-                    defaultName = DEFAULT_FEMALE_NAME;
-                    playerTitle = DEFAULT_FEMALE_TITLE;
+                case (int)Data.Gender.Female:
+                    defaultName = data.DEFAULT_FEMALE_NAME;
+                    playerTitle = data.DEFAULT_FEMALE_TITLE;
                     break;
-                case (int)Gender.Male:
+                case (int)Data.Gender.Male:
                 default:
-                    defaultName = DEFAULT_MALE_NAME;
-                    playerTitle = DEFAULT_MALE_TITLE;
+                    defaultName = data.DEFAULT_MALE_NAME;
+                    playerTitle = data.DEFAULT_MALE_TITLE;
                     break;
             }
 
@@ -340,9 +305,9 @@ namespace MiniRPG
             playerGender = playerGender.ToLower();
 
             string[] heroText = new string[3];
-            heroText[(int)HeroText.Name] = playerName;
-            heroText[(int)HeroText.Title] = playerTitle;
-            heroText[(int)HeroText.Genre] = playerGender;
+            heroText[(int)Data.HeroText.Name] = playerName;
+            heroText[(int)Data.HeroText.Title] = playerTitle;
+            heroText[(int)Data.HeroText.Genre] = playerGender;
 
             return heroText;
         }
@@ -428,7 +393,7 @@ namespace MiniRPG
             - hero -> La liste mise à jour des statistiques du héros
             - -1 si le joueur choisit de quitter le jeu
             - -2 si le héros meurt */
-        public static int[] manageCombatPhase(string[] heroText, int[] hero)
+        public static int[] manageCombatPhase(string[] heroText, int[] hero, Data data)
         {
             //Signification des valeurs : Nom, vie, puissance, expérience, butin
             object[][] monsters = new object[][]
@@ -453,15 +418,15 @@ namespace MiniRPG
 
             //Variables du héros
             int playerChoice;
-            string heroName = heroText[(int)HeroText.Name];
-            int heroLevel = hero[(int)Hero.Level];
-            int heroHp = hero[(int)Hero.Hp];
-            int heroMaxHp = hero[(int)Hero.MaxHp];
-            int heroPower = hero[(int)Hero.Power];
-            int heroGold = hero[(int)Hero.Gold];
-            int heroPotions = hero[(int)Hero.Potions];
-            int heroXp = hero[(int)Hero.Xp];
-            int nextLevelThreshold = hero[(int)Hero.LevelThreshold];
+            string heroName = heroText[(int)Data.HeroText.Name];
+            int heroLevel = hero[(int)Data.Hero.Level];
+            int heroHp = hero[(int)Data.Hero.Hp];
+            int heroMaxHp = hero[(int)Data.Hero.MaxHp];
+            int heroPower = hero[(int)Data.Hero.Power];
+            int heroGold = hero[(int)Data.Hero.Gold];
+            int heroPotions = hero[(int)Data.Hero.Potions];
+            int heroXp = hero[(int)Data.Hero.Xp];
+            int nextLevelThreshold = hero[(int)Data.Hero.LevelThreshold];
 
 
             bool inBattle = true;
@@ -473,17 +438,17 @@ namespace MiniRPG
             Console.WriteLine($"{heroName} entre dans le Donjon.");
             do
             {
-                Console.WriteLine($"Un nouveau combat se prépare... ({battlesCount + 1}/{MAX_CONSECUTIVE_BATTLES})");
+                Console.WriteLine($"Un nouveau combat se prépare... ({battlesCount + 1}/{data.MAX_CONSECUTIVE_BATTLES})");
                 bool fleeing = false;
 
                 // Créer un monstre
                 int monsterIndex = spawnRandomMonster(monsters);
                 object[] monster = monsters[monsterIndex];
-                string monsterName = (string)monster[(int)Monster.Name];
-                int monsterHp = (int)monster[(int)Monster.Hp];
-                int monsterPower = (int)monster[(int)Monster.Power];
-                int monsterXpLoot = (int)monster[(int)Monster.XpLoot];
-                int monsterGoldLoot = (int)monster[(int)Monster.GoldLoot];
+                string monsterName = (string)monster[(int)Data.Monster.Name];
+                int monsterHp = (int)monster[(int)Data.Monster.Hp];
+                int monsterPower = (int)monster[(int)Data.Monster.Power];
+                int monsterXpLoot = (int)monster[(int)Data.Monster.XpLoot];
+                int monsterGoldLoot = (int)monster[(int)Data.Monster.GoldLoot];
                 bool deadMonster = false;
 
                 // Afficher les actions disponibles pour le joueur
@@ -494,13 +459,13 @@ namespace MiniRPG
                     // Résoudre l'action du joueur
                     switch (playerChoice)
                     {
-                        case (int)Combat.SeeStats:
+                        case (int)Data.Combat.SeeStats:
                             hero = new[] { heroLevel, heroHp, heroMaxHp, heroPower, heroGold, heroPotions, heroXp, nextLevelThreshold };
-                            string statisticsSheet = getHeroSheet(heroText, hero);
+                            string statisticsSheet = getHeroSheet(heroText, hero, data);
                             Console.WriteLine(statisticsSheet);
                             break;
 
-                        case (int)Combat.Attack:
+                        case (int)Data.Combat.Attack:
                             monsterHp = resolveHeroAttack(heroName, monsterName, heroPower, monsterHp);
 
                             if (monsterHp == 0)
@@ -525,17 +490,17 @@ namespace MiniRPG
                             }
                             break;
 
-                        case (int)Combat.DrinkPotion:
+                        case (int)Data.Combat.DrinkPotion:
                             int[] heroValues = resolveHeroDrinksPotion(heroName, heroHp, heroMaxHp, heroPotions);
                             heroHp = heroValues[0];
                             heroPotions = heroValues[1];
                             break;
 
-                        case (int)Combat.Flee:
+                        case (int)Data.Combat.Flee:
                             int heroFlight = resolveHeroFlight(
                                 new[] { heroName, monsterName },
                                 new[] { heroXp, nextLevelThreshold },
-                                new[] { monsterHp, (int)monster[(int)Monster.Hp] });
+                                new[] { monsterHp, (int)monster[(int)Data.Monster.Hp] }, data);
 
                             if (heroFlight == -1)
                             {
@@ -554,7 +519,7 @@ namespace MiniRPG
                             }
                             break;
 
-                        case (int)Combat.Quit:
+                        case (int)Data.Combat.Quit:
                             quit = (bool)askForConfirmation("Êtes-vous sûr(e) de vouloir quitter ?");
                             break;
                     }
@@ -566,26 +531,26 @@ namespace MiniRPG
 
                 battlesCount++;
 
-                if (battlesCount >= MAX_CONSECUTIVE_BATTLES || quit)
+                if (battlesCount >= data.MAX_CONSECUTIVE_BATTLES || quit)
                 {
                     Console.WriteLine($"Tous les occupant de cette partie du donjon ont été tués ou évités.\n{heroName} sort du donjon.");
                     inBattle = false;
                 }
             } while (inBattle);
-            hero[(int)Hero.Level] = heroLevel;
-            hero[(int)Hero.Hp] = heroHp;
-            hero[(int)Hero.MaxHp] = heroMaxHp;
-            hero[(int)Hero.Power] = heroPower;
-            hero[(int)Hero.Gold] = heroGold;
-            hero[(int)Hero.Potions] = heroPotions;
-            hero[(int)Hero.Xp] = heroXp;
-            hero[(int)Hero.LevelThreshold] = nextLevelThreshold;
+            hero[(int)Data.Hero.Level] = heroLevel;
+            hero[(int)Data.Hero.Hp] = heroHp;
+            hero[(int)Data.Hero.MaxHp] = heroMaxHp;
+            hero[(int)Data.Hero.Power] = heroPower;
+            hero[(int)Data.Hero.Gold] = heroGold;
+            hero[(int)Data.Hero.Potions] = heroPotions;
+            hero[(int)Data.Hero.Xp] = heroXp;
+            hero[(int)Data.Hero.LevelThreshold] = nextLevelThreshold;
 
             return hero;
 
         }
 
-        public static int[] manageRestPhase(string[] heroText, int[] hero, int[] levelThresholds)
+        public static int[] manageRestPhase(string[] heroText, int[] hero, int[] levelThresholds, Data data)
         {
             // La liste des choix que le joueur peut faire au repos
             string[][] restChoices = new string[][]
@@ -601,15 +566,15 @@ namespace MiniRPG
 
             //Variables du héros
             int playerChoice;
-            string heroName = heroText[(int)HeroText.Name];
-            int heroLevel = hero[(int)Hero.Level];
-            int heroHp = hero[(int)Hero.Hp];
-            int heroMaxHp = hero[(int)Hero.MaxHp];
-            int heroPower = hero[(int)Hero.Power];
-            int heroGold = hero[(int)Hero.Gold];
-            int heroPotions = hero[(int)Hero.Potions];
-            int heroXp = hero[(int)Hero.Xp];
-            int nextLevelThreshold = hero[(int)Hero.LevelThreshold];
+            string heroName = heroText[(int)Data.HeroText.Name];
+            int heroLevel = hero[(int)Data.Hero.Level];
+            int heroHp = hero[(int)Data.Hero.Hp];
+            int heroMaxHp = hero[(int)Data.Hero.MaxHp];
+            int heroPower = hero[(int)Data.Hero.Power];
+            int heroGold = hero[(int)Data.Hero.Gold];
+            int heroPotions = hero[(int)Data.Hero.Potions];
+            int heroXp = hero[(int)Data.Hero.Xp];
+            int nextLevelThreshold = hero[(int)Data.Hero.LevelThreshold];
 
             Console.WriteLine($"{heroName} entre en ville.");
             do
@@ -619,36 +584,36 @@ namespace MiniRPG
                 // Résoudre l'action du joueur
                 switch (playerChoice)
                 {
-                    case (int)Rest.SeeStats:
-                        Console.WriteLine(getHeroSheet(heroText, hero));
+                    case (int)Data.Rest.SeeStats:
+                        Console.WriteLine(getHeroSheet(heroText, hero, data));
                         break;
 
-                    case (int)Rest.Sleep:
+                    case (int)Data.Rest.Sleep:
                         int[] heroEssentials = new int[] { heroLevel, heroHp, heroMaxHp, heroPower, heroXp, nextLevelThreshold };
-                        heroEssentials = resolveHeroLevelingUp(heroName, heroEssentials, levelThresholds);
+                        heroEssentials = resolveHeroLevelingUp(heroName, heroEssentials, levelThresholds, data);
                         heroLevel = heroEssentials[0];
                         heroHp = heroEssentials[1];
                         heroMaxHp = heroEssentials[2];
                         heroPower = heroEssentials[3];
                         heroXp = heroEssentials[4];
                         nextLevelThreshold = heroEssentials[5];
-                        heroHp = resolveHeroSleeping(heroName, heroHp, heroMaxHp);
-                        if (heroLevel == HERO_MAX_LEVEL)
+                        heroHp = resolveHeroSleeping(heroName, heroHp, heroMaxHp, data);
+                        if (heroLevel == data.HERO_MAX_LEVEL)
                         {
                             gameWon = true;
                         }
                         done = true;
                         break;
 
-                    case (int)Rest.BuyPotion:
+                    case (int)Data.Rest.BuyPotion:
                         int potionsCount;
                         int price;
                         bool tooExpensive;
                         do
                         {
                             Console.WriteLine($"{heroName} possède {heroGold} pièces d'or.");
-                            potionsCount = askForItemCount($"Combien de potions ? ({POTION_PRICE} pièces d'or par article)", 10);
-                            price = POTION_PRICE * potionsCount;
+                            potionsCount = askForItemCount($"Combien de potions ? ({data.POTION_PRICE} pièces d'or par article)", 10);
+                            price = data.POTION_PRICE * potionsCount;
                             tooExpensive = heroGold < price;
 
                             if (tooExpensive)
@@ -668,7 +633,7 @@ namespace MiniRPG
                         Console.WriteLine($"{heroName} a acheté {potionsCount} potions pour la modique somme de {price} pièces d'or.");
                         done = true;
                         break;
-                    case (int)Rest.Quit:
+                    case (int)Data.Rest.Quit:
                         quit = (bool)askForConfirmation("Êtes-vous sûr(e) de vouloir quitter ?");
                         break;
                 }
@@ -686,14 +651,14 @@ namespace MiniRPG
 
             Console.WriteLine($"{heroName} a bien profité de ce répit mais il est temps de reprendre le combat.");
 
-            hero[(int)Hero.Level] = heroLevel;
-            hero[(int)Hero.Hp] = heroHp;
-            hero[(int)Hero.MaxHp] = heroMaxHp;
-            hero[(int)Hero.Power] = heroPower;
-            hero[(int)Hero.Gold] = heroGold;
-            hero[(int)Hero.Potions] = heroPotions;
-            hero[(int)Hero.Xp] = heroXp;
-            hero[(int)Hero.LevelThreshold] = nextLevelThreshold;
+            hero[(int)Data.Hero.Level] = heroLevel;
+            hero[(int)Data.Hero.Hp] = heroHp;
+            hero[(int)Data.Hero.MaxHp] = heroMaxHp;
+            hero[(int)Data.Hero.Power] = heroPower;
+            hero[(int)Data.Hero.Gold] = heroGold;
+            hero[(int)Data.Hero.Potions] = heroPotions;
+            hero[(int)Data.Hero.Xp] = heroXp;
+            hero[(int)Data.Hero.LevelThreshold] = nextLevelThreshold;
 
             return hero;
         }
@@ -703,26 +668,26 @@ namespace MiniRPG
             - hero -> liste des charactéristiques du héros
            Valeur de retour :
                - feuille de personnage sous forme de message */
-        public static string getHeroSheet(string[] heroText, int[] hero)
+        public static string getHeroSheet(string[] heroText, int[] hero, Data data)
         {
             string levelOutput;
 
-            string heroName = heroText[(int)HeroText.Name];
-            string heroTitle = heroText[(int)HeroText.Title];
-            string heroGenre = heroText[(int)HeroText.Genre];
+            string heroName = heroText[(int)Data.HeroText.Name];
+            string heroTitle = heroText[(int)Data.HeroText.Title];
+            string heroGenre = heroText[(int)Data.HeroText.Genre];
 
-            int heroLevel = hero[(int)Hero.Level];
-            int heroHp = hero[(int)Hero.Hp];
-            int heroMaxHp = hero[(int)Hero.MaxHp];
-            int heroPower = hero[(int)Hero.Power];
-            int heroGold = hero[(int)Hero.Gold];
-            int heroPotions = hero[(int)Hero.Potions];
-            int heroXp = hero[(int)Hero.Xp];
-            int nextLevelThreshold = hero[(int)Hero.LevelThreshold];
+            int heroLevel = hero[(int)Data.Hero.Level];
+            int heroHp = hero[(int)Data.Hero.Hp];
+            int heroMaxHp = hero[(int)Data.Hero.MaxHp];
+            int heroPower = hero[(int)Data.Hero.Power];
+            int heroGold = hero[(int)Data.Hero.Gold];
+            int heroPotions = hero[(int)Data.Hero.Potions];
+            int heroXp = hero[(int)Data.Hero.Xp];
+            int nextLevelThreshold = hero[(int)Data.Hero.LevelThreshold];
 
             int nextLevel;
 
-            if (heroLevel == HERO_MAX_LEVEL)
+            if (heroLevel == data.HERO_MAX_LEVEL)
             {
                 levelOutput = $"\n    *°*A atteint le niveau maximum*°*";
             }
@@ -759,9 +724,9 @@ namespace MiniRPG
             return hpLoss;
         }
 
-        public static int getHpHealed(int hp, int maxHp)
+        public static int getHpHealed(int hp, int maxHp, Data data)
         {
-            int healAmount = (int)Math.Floor(maxHp * SLEEP_HEALING_RATIO);
+            int healAmount = (int)Math.Floor(maxHp * data.SLEEP_HEALING_RATIO);
             hp += healAmount;
             if (hp > maxHp)
             {
@@ -771,9 +736,9 @@ namespace MiniRPG
             return healAmount;
         }
 
-        public static int getXpLost(int xp, int nextLevelThreshold)
+        public static int getXpLost(int xp, int nextLevelThreshold, Data data)
         {
-            int maxXpLost = nextLevelThreshold / XP_LOSS_STRENGTH;
+            int maxXpLost = nextLevelThreshold / data.XP_LOSS_STRENGTH;
             int xpLost = xp - maxXpLost;
 
             if (xpLost < 0)
@@ -872,11 +837,11 @@ namespace MiniRPG
             return new int[] { heroXp, heroGold };
         }
 
-        public static int resolveHeroSleeping(string heroName, int heroHp, int heroMaxHp)
+        public static int resolveHeroSleeping(string heroName, int heroHp, int heroMaxHp, Data data)
         {
             if (heroHp < heroMaxHp)
             {
-                int healAmount = getHpHealed(heroHp, heroMaxHp);
+                int healAmount = getHpHealed(heroHp, heroMaxHp, data);
                 Console.WriteLine($"{heroName} récupère {healAmount} points de vie pour avoir dormi dans un lit confortable.");
             }
             else
@@ -887,7 +852,7 @@ namespace MiniRPG
             return heroHp;
         }
 
-        public static int[] resolveHeroLevelingUp(string heroName, int[] heroEssentials, int[] levelThresholds)
+        public static int[] resolveHeroLevelingUp(string heroName, int[] heroEssentials, int[] levelThresholds, Data data)
         {
             int heroLevel = heroEssentials[0];
             int heroHp = heroEssentials[1];
@@ -896,22 +861,22 @@ namespace MiniRPG
             int heroXp = heroEssentials[4];
             int levelThreshold = heroEssentials[5];
 
-            if (heroXp >= levelThreshold && heroLevel < HERO_MAX_LEVEL)
+            if (heroXp >= levelThreshold && heroLevel < data.HERO_MAX_LEVEL)
             {
                 heroLevel++;
                 heroXp = 0;
-                heroHp = heroMaxHp += HERO_MAX_HP_INCREASE;
-                heroPower += HERO_POWER_INCREASE;
+                heroHp = heroMaxHp += data.HERO_MAX_HP_INCREASE;
+                heroPower += data.HERO_POWER_INCREASE;
                 levelThreshold = levelThresholds[heroLevel - 1];
                 Console.WriteLine($"Avec {heroXp} points d'expérience accumulés, {heroName} passe au niveau {heroLevel}." +
-                    $"\nLes points de vie de {heroName} passent à {heroMaxHp}(+{HERO_MAX_HP_INCREASE}) et " +
-                    $"sa puissance monte à {heroPower}(+{HERO_POWER_INCREASE}).");
+                    $"\nLes points de vie de {heroName} passent à {heroMaxHp}(+{data.HERO_MAX_HP_INCREASE}) et " +
+                    $"sa puissance monte à {heroPower}(+{data.HERO_POWER_INCREASE}).");
             }
 
             return new int[] { heroLevel, heroHp, heroMaxHp, heroPower, heroXp, levelThreshold };
         }
 
-        public static int resolveHeroFlight(string[] names, int[] heroEssentials, int[] monsterEssentials)
+        public static int resolveHeroFlight(string[] names, int[] heroEssentials, int[] monsterEssentials, Data data)
         {
             string heroName = names[0];
             string monsterName = names[1];
@@ -941,7 +906,7 @@ namespace MiniRPG
             if (flightAttempt <= flightChances)
             {
                 string partialText = "";
-                int xpLost = getXpLost(heroXp, nextLevelThreshold);
+                int xpLost = getXpLost(heroXp, nextLevelThreshold, data);
                 heroXp -= xpLost;
 
                 if (xpLost > 0)
