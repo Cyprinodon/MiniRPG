@@ -106,7 +106,7 @@ namespace MiniRPG
                 else if (gameEvent == -1)// Le personnage est mort
                 {
                     closeConsole("==========================================" +
-                                 "Vous n'avez pas su garder votre héros en vie, c'est la FIN DE LA PARTIE." +
+                                 "\nVous n'avez pas su garder votre héros en vie, c'est la FIN DE LA PARTIE." +
                                  "\n(Ce jeu est INJUSTE, je sais...)");
                 }
                 else if (gameEvent == -3)
