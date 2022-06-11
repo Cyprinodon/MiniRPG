@@ -1,4 +1,6 @@
-﻿namespace MiniRPG.Game
+﻿using System.Collections.Generic;
+
+namespace MiniRPG.Game
 {
     static class Data
     {
@@ -32,5 +34,17 @@
         //--------------------------------
         public static readonly double SLEEP_HEALING_RATIO = 0.33f;
         public static readonly double POTION_POTENCY = 1.0f;
+
+        //L'expérience à accumuler pour atteindre chaque niveau
+        public static  readonly int[] LEVEL_THRESHOLDS = new int[]
+        {
+                30, 60, 90, 120, 150, 180, 210, 240, 300
+        };
+
+        public static Structs.Gender[] GENDER_CHOICES = new Structs.Gender[] 
+        {
+            new Structs.Gender("H", "Un", "Homme"),
+            new Structs.Gender("F", "Une", "Femme")
+        };
     }
 }
