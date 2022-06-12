@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using MiniRPG.Game;
 using MiniRPG.Game.Entities;
+using Structs = MiniRPG.Game.Structs;
 
 namespace MiniRPG
 {
@@ -335,21 +337,23 @@ namespace MiniRPG
             - monsterList -> La liste contenant tous les monstres et leurs valeurs
            Valeur de retour :
             - monsterIndex -> l'indice du monstre dans la liste*/
-        public static int spawnRandomMonster(object[][] monstersList)
+        public static Monster spawnRandomMonster(Dictionary<string, Structs.Monster> monsters)
         {
-            int monsterIndex;
-            string monsterName;
-            int monsterHp;
-            int monsterPower;
+            string[] keys = new string[monsters.Count];
+            monsters.Keys.CopyTo(keys, 0);
+            int index;
+
             Random randomizer = new Random();
 
-            monsterIndex = randomizer.Next(0, monstersList.Length);
-            monsterName = (string)monstersList[monsterIndex][0];
-            monsterHp = (int)monstersList[monsterIndex][1];
-            monsterPower = (int)monstersList[monsterIndex][2];
-            Console.WriteLine($"Un {monsterName} apparait !\nIl possède {monsterHp} points de vie et ses attaques infligent {monsterPower} points de dégâts.");
+            index = randomizer.Next(0, keys.Length);
 
-            return monsterIndex;
+            Structs.Monster monsterTemplate = monsters[keys[index]];
+
+            Monster monster = new Monster(monsterTemplate);
+
+            Console.WriteLine($"Un {monster.Name} apparait !\nIl possède {monster.MaxHp} points de vie et ses attaques infligent {monster.Power} points de dégâts.");
+
+            return monster;
         }
 
         /* Effectue toute la logique liée à la phase de combat
@@ -362,17 +366,6 @@ namespace MiniRPG
         public static Hero manageCombatPhase(Hero state)
         {
             Hero hero = new Hero(state);
-
-            //Signification des valeurs : Nom, vie, puissance, expérience, butin
-            object[][] monsters = new object[][]
-            {
-                new object[] { "Ver de terre",  5,  0,   2,  0 },
-                new object[] { "Rat",          15,  5,   8,  2 },
-                new object[] { "Gobelin",      45, 10,  16,  5 },
-                new object[] { "Squelette",    80, 15,  32, 12 },
-                new object[] { "Démon",       120, 30,  64, 28 },
-                new object[] { "Dragon",      250, 50, 128, 55 }
-            };
 
             // La liste des choix que le joueur peut faire en combat
             string[][] combatChoices = new string[][]
@@ -397,20 +390,13 @@ namespace MiniRPG
                 Console.WriteLine($"Un nouveau combat se prépare... ({battlesCount + 1}/{Data.MAX_CONSECUTIVE_BATTLES})");
 
                 // Créer un monstre
-                int monsterIndex = spawnRandomMonster(monsters);
-                object[] monster = monsters[monsterIndex];
-                string monsterName = (string)monster[(int)Data.Monster.Name];
-                int monsterHp = (int)monster[(int)Data.Monster.Hp];
-                int monsterPower = (int)monster[(int)Data.Monster.Power];
-                int monsterXpLoot = (int)monster[(int)Data.Monster.XpLoot];
-                int monsterGoldLoot = (int)monster[(int)Data.Monster.GoldLoot];
-                bool deadMonster = false;
+                Monster monster = spawnRandomMonster(Data.MONSTERS);
 
                 // Afficher les actions disponibles pour le joueur
                 do
                 {
                     playerChoice = askForChoice(combatChoices, $"====================================\n" +
-                        $"Face à ce dangereux {monsterName}, {hero.Name} doit déterminer sa prochaine action");
+                        $"Face à ce dangereux {monster.Name}, {hero.Name} doit déterminer sa prochaine action");
                     // Résoudre l'action du joueur
                     switch (playerChoice)
                     {
@@ -420,18 +406,18 @@ namespace MiniRPG
                             break;
 
                         case (int)Data.Combat.Attack:
-                            monsterHp = resolveHeroAttack(hero.Name, monsterName, hero.Power, monsterHp);
+                            monster.Hp = resolveHeroAttack(hero.Name, monster.Name, hero.Power, monster.Hp);
 
-                            if (monsterHp == 0)
+                            if (monster.Hp == 0)
                             {
-                                deadMonster = true;
-                                int[] monsterLoot = new[] { monsterXpLoot, monsterGoldLoot };
+                                monster.IsDead = true;
+                                int[] monsterLoot = new[] { monster.Xp, monster.Gold };
 
                                 hero = resolveHeroGains(hero, monsterLoot);
                             }
                             else
                             {
-                                hero.Hp = resolveMonsterAttack(hero.Name, monsterName, monsterPower, hero.Hp);
+                                hero = resolveMonsterAttack(hero, monster);
                             }
                             break;
 
@@ -441,13 +427,12 @@ namespace MiniRPG
 
                         case (int)Data.Combat.Flee:
                             hero = resolveHeroFlight(
-                                monsterName,
                                 hero,
-                                new[] { monsterHp, (int)monster[(int)Data.Monster.Hp] });
+                                monster);
 
                             if (!hero.HasFled)
                             {
-                                hero.Hp = resolveMonsterAttack(hero.Name, monsterName, monsterPower, hero.Hp);
+                                hero = resolveMonsterAttack(hero, monster);
                             }
                             break;
 
@@ -456,7 +441,7 @@ namespace MiniRPG
                             break;
                     }
 
-                } while (!hero.GaveUp && !hero.IsDead && !deadMonster && !hero.HasFled);
+                } while (!hero.GaveUp && !hero.IsDead && !monster.IsDead && !hero.HasFled);
 
                 battlesCount++;
                 hero.HasFled = false;
@@ -669,14 +654,15 @@ namespace MiniRPG
             return monsterHp;
         }
 
-        public static int resolveMonsterAttack(string heroName, string monsterName, int monsterPower, int heroHp)
+        public static Hero resolveMonsterAttack(Hero state, Monster monster)
         {
-            string[] names = new string[] { $"le {monsterName}", heroName };
-            int[] attackValues = new int[] { monsterPower, heroHp };
+            Hero hero = new Hero(state);
+            string[] names = new string[] { $"le {monster.Name}", hero.Name };
+            int[] attackValues = new int[] { monster.Power, hero.Hp };
 
-            heroHp = resolveAttack(names, attackValues, "riposte vicieusement");
+            hero.Hp = resolveAttack(names, attackValues, "riposte vicieusement");
 
-            return heroHp;
+            return hero;
         }
 
         /* Donne au héros le butin du monstre qu'il est en droit de recevoir :
@@ -746,21 +732,19 @@ namespace MiniRPG
             return hero;
         }
 
-        public static Hero resolveHeroFlight(string monsterName, Hero state, int[] monsterEssentials)
+        public static Hero resolveHeroFlight(Hero state, Monster monster)
         {
             Hero hero = new Hero(state);
-            int monsterHp = monsterEssentials[0];
-            int monsterMaxHp = monsterEssentials[1];
             double flightChances;
             double flightAttempt;
 
             Random randomizer = new Random();
 
-            if (monsterHp >= monsterMaxHp * 0.75)
+            if (monster.Hp >= monster.MaxHp * 0.75)
             {
                 flightChances = 0.5;
             }
-            else if (monsterHp >= monsterMaxHp * 0.5)
+            else if (monster.Hp >= monster.MaxHp * 0.5)
             {
                 flightChances = 0.75;
             }
@@ -783,10 +767,12 @@ namespace MiniRPG
                 }
 
                 Console.WriteLine($"{hero.Name} fuit le combat" + partialText + ".");
-                return hero;
+            }
+            else
+            {
+                Console.WriteLine($"{hero.Name} tente de fuir le combat mais le {monster.Name} l'en empêche.");
             }
 
-            Console.WriteLine($"{hero.Name} tente de fuir le combat mais le {monsterName} l'en empêche.");
             return hero;
         }
 

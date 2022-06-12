@@ -18,7 +18,9 @@ namespace MiniRPG.Game
         public static readonly string DEFAULT_MALE_TITLE = "vaillant prince";
         public static readonly string DEFAULT_FEMALE_NAME = "La Vaillante Princesse";
         public static readonly string DEFAULT_FEMALE_TITLE = "vaillante princesse";
+        public static readonly string DEFAULT_MONSTER_NAME = "Monstre Indéterminé";
         //-------------------------------
+        public static readonly int ALLOWED_NAME_LENGTH = 25;
         public static readonly int HERO_STARTING_LEVEL = 1;
         public static readonly int HERO_STARTING_HP = 70;
         public static readonly int HERO_STARTING_POWER = 10;
@@ -45,6 +47,16 @@ namespace MiniRPG.Game
         {
             new Structs.Gender("H", "Un", "Homme"),
             new Structs.Gender("F", "Une", "Femme")
+        };
+
+        public static Dictionary<string, Structs.Monster> MONSTERS = new Dictionary<string, Structs.Monster>()
+        {
+            { "worm", new Structs.Monster("Ver de terre", 5, 0, 2, 0) },
+            { "rat", new Structs.Monster("Rat", 15, 5, 8, 2) },
+            { "goblin", new Structs.Monster("Gobelin", 45, 10, 16, 5) },
+            { "skeleton", new Structs.Monster("Squelette", 80, 15, 32, 12) },
+            { "demon", new Structs.Monster("Démon", 120, 30, 64, 28) },
+            { "dragon", new Structs.Monster("Dragon", 250, 50, 128, 55) }
         };
     }
 }
