@@ -50,6 +50,7 @@ namespace MiniRPG.Game.Entities
             Hp = state.Hp;
             MaxHp = state.MaxHp;
             Power = state.Power;
+            Xp = state.Xp;
             Gold = state.Gold;
             Potions = state.Potions;
             GaveUp = state.GaveUp;
