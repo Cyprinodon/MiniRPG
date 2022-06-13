@@ -333,29 +333,6 @@ namespace MiniRPG
             return userChoice;
         }
 
-        /* Choisis un monstre dans la liste fournie en paramètre et affiche son apparition
-            - monsterList -> La liste contenant tous les monstres et leurs valeurs
-           Valeur de retour :
-            - monsterIndex -> l'indice du monstre dans la liste*/
-        public static Monster spawnRandomMonster(Dictionary<string, Structs.Monster> monsters)
-        {
-            string[] keys = new string[monsters.Count];
-            monsters.Keys.CopyTo(keys, 0);
-            int index;
-
-            Random randomizer = new Random();
-
-            index = randomizer.Next(0, keys.Length);
-
-            Structs.Monster monsterTemplate = monsters[keys[index]];
-
-            Monster monster = new Monster(monsterTemplate);
-
-            Console.WriteLine($"Un {monster.Name} apparait !\nIl possède {monster.MaxHp} points de vie et ses attaques infligent {monster.Power} points de dégâts.");
-
-            return monster;
-        }
-
         /* Effectue toute la logique liée à la phase de combat
             - heroText -> Liste des informations textuelles du héros
             - hero -> Liste des statistiques du héros
@@ -387,10 +364,11 @@ namespace MiniRPG
             Console.WriteLine($"{hero.Name} entre dans le Donjon.");
             do
             {
+                Battle fight = new Battle(hero);
                 Console.WriteLine($"Un nouveau combat se prépare... ({battlesCount + 1}/{Data.MAX_CONSECUTIVE_BATTLES})");
 
                 // Créer un monstre
-                Monster monster = spawnRandomMonster(Data.MONSTERS);
+                Monster monster = fight.SpawnRandomMonster(Data.MONSTERS);
 
                 // Afficher les actions disponibles pour le joueur
                 do
@@ -406,23 +384,14 @@ namespace MiniRPG
                             break;
 
                         case (int)Data.Combat.Attack:
-                            monster.Hp = resolveHeroAttack(hero.Name, monster.Name, hero.Power, monster.Hp);
-
-                            if (monster.Hp == 0)
-                            {
-                                monster.IsDead = true;
-                                int[] monsterLoot = new[] { monster.Xp, monster.Gold };
-
-                                hero = resolveHeroGains(hero, monsterLoot);
-                            }
-                            else
-                            {
-                                hero = resolveMonsterAttack(hero, monster);
-                            }
+                            fight = fight.DoPlayerAttack();
+                            hero = fight.Hero;
+                            monster = fight.Monster;
                             break;
 
                         case (int)Data.Combat.DrinkPotion:
-                            hero = resolveHeroDrinksPotion(hero);
+                            fight = fight.DoPlayerDrinkPotion();
+                            hero = fight.Hero;
                             break;
 
                         case (int)Data.Combat.Flee:
@@ -439,6 +408,20 @@ namespace MiniRPG
                         case (int)Data.Combat.Quit:
                             hero.GaveUp = (bool)askForConfirmation("Êtes-vous sûr(e) de vouloir quitter ?");
                             break;
+                    }
+
+                    if (fight.IsDone)
+                    {
+                        Structs.Loot monsterLoot = new Structs.Loot(monster.Xp, monster.Gold);
+
+                        Structs.PickupResult pickupResult = hero.PickUp(monsterLoot);
+                        hero = pickupResult.Actor;
+                        Console.WriteLine($"{hero.Name} a gagné {pickupResult.LootGained.Gold} pièces d'or et {pickupResult.LootGained.Xp} points d'expérience.");
+
+                        if (hero.Xp == hero.LevelThreshold)
+                        {
+                            Console.WriteLine($"{hero.Name} a atteint la limite d'expérience autorisée ({hero.LevelThreshold} exp.). Dormez une fois en ville pour gagner un niveau.");
+                        }
                     }
 
                 } while (!hero.GaveUp && !hero.IsDead && !monster.IsDead && !hero.HasFled);
@@ -671,16 +654,17 @@ namespace MiniRPG
             - gains -> l'or et l'expérience donnée par le monstre)
            Valeur de retour :
             - heroGains -> l'or et l'expérience que le héros va recevoir */
-        public static Hero resolveHeroGains(Hero state, int[] gains)
+        public static Hero resolveHeroGains(Hero state, Structs.Loot gains)
         {
             Hero hero = new Hero(state);
 
-            int goldGain = gains[0];
-            int xpGain = gains[1];
-
-            if (hero.Xp + xpGain > hero.LevelThreshold)
+            if (hero.Xp + gains.Xp > hero.LevelThreshold)
             {
-                xpGain = hero.LevelThreshold - hero.Xp;
+                hero.Xp = hero.LevelThreshold - hero.Xp;
+            }
+            else
+            {
+                hero.Xp = gains.Xp;
             }
 
             hero.Gold += goldGain;

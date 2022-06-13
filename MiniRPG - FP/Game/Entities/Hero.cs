@@ -1,18 +1,13 @@
 ﻿using MiniRPG.Game.Structs;
+using System;
 
 namespace MiniRPG.Game.Entities
 {
     /// <summary>
     /// Une entité capable de monter en niveau, attaquer, fuir, boire des potions et se reposer.
     /// </summary>
-    class Hero
+    class Hero:Fighter
     {
-        /// <value>
-        /// <see cref="Name"/> est une propriété de type <see langword="string"/> représentant le nom du héros.
-        /// <example>(ex: Valérie)</example>
-        /// </value>
-        public string Name { get; set; } = "";
-
         /// <value>
         /// <see cref="Title"/> est une propriété de type <see langword="string"/> représentant l'appellation courante du héros.
         /// <example><i>(ex: vaillant prince)</i></example>
@@ -28,35 +23,6 @@ namespace MiniRPG.Game.Entities
         /// <see cref="Level"/> est une propriété de type <see langword="int"/> représentant le niveau du héros. 
         /// </value>
         public int Level { get; set; } = 1;
-
-        /// <value>
-        /// <see cref="Hp"/> est une propriété de type <see langword="int"/> représentant les points de vie restant du héros.
-        /// </value>
-        public int Hp { get; set; } = 1;
-
-        /// <value>
-        /// <see cref="MaxHp"/> est une propriété de type <see langword="int"/> représentant les points de vie maximum 
-        /// du héros.
-        /// </value>
-        public int MaxHp { get; set; } = 1;
-
-        /// <value>
-        /// <see cref="Power"/> est une propriété de type <see langword="int"/> représentant la puissance d'attaque brute 
-        /// du héros.
-        /// </value>
-        public int Power { get; set; } = 0;
-
-        /// <value>
-        /// <see cref="Xp"/> est une propriété de type <see langword="int"/> représentant la quantité de points d'expérience 
-        /// accumulés par le héros.
-        /// </value>
-        public int Xp { get; set; } = 0;
-
-        /// <value>
-        /// <see cref="Gold"/> est une propriété de type <see langword="int"/> représentant la quantité d'argent 
-        /// accumulée par le héros.
-        /// </value>
-        public int Gold { get; set; } = 0;
 
         /// <value>
         /// <see cref="Potion"/> est une propriété de type <see langword="int"/> représentant la quantité de potions 
@@ -90,15 +56,6 @@ namespace MiniRPG.Game.Entities
         public bool HasWon { get; set; } = false;
 
         /// <value>
-        /// <see cref="IsDead"/> est un accesseur de type <see langword="bool"/> permettant de savoir si le héros est mort.
-        /// <para></para>
-        /// <remark>
-        /// <i>Cette variable prends la valeur <c>true</c> lorsque les points de vie du héros sont inférieur à <c>1</c>.</i>
-        /// </remark>
-        /// </value>
-        public bool IsDead { get => Hp <= 0; }
-
-        /// <value>
         /// <see cref="HasFled"/> est une propriété de type <see langword="bool"/> permettant de savoir si le héros 
         /// a réussi sa tentative de fuite.
         /// </value>
@@ -107,27 +64,53 @@ namespace MiniRPG.Game.Entities
         /// <summary>
         /// Constructeur par défaut de <see cref="Hero"/>.
         /// </summary>
-        public Hero(){ }
+        public Hero():base() { }
 
         /// <summary>
         /// Constructeur capable de construire une copie d'un objet <see cref="Hero"/> existant.
         /// </summary>
         /// <param name="state"><see cref="Hero"/> à copier.</param>
-        public Hero(Hero state)
+        public Hero(Hero state):base(state.Name, state.Hp, state.MaxHp, state.Power, state.Xp, state.Gold)
         {
-            Name = state.Name;
             Title = state.Title;
             Gender = state.Gender;
             Level = state.Level;
-            Hp = state.Hp;
-            MaxHp = state.MaxHp;
-            Power = state.Power;
-            Xp = state.Xp;
-            Gold = state.Gold;
             Potions = state.Potions;
             GaveUp = state.GaveUp;
             HasWon = state.HasWon;
             HasFled = state.HasFled;
+        }
+
+        public PickupResult PickUp(Loot loot)
+        {
+            Hero hero = new Hero(this);
+            Loot gains = loot;
+
+            if (hero.Xp + loot.Xp > hero.LevelThreshold)
+            {
+                int xpGains = hero.LevelThreshold - hero.Xp;
+                gains = new Loot(loot.Gold, xpGains);
+            }
+
+            hero.Xp += gains.Xp;
+            hero.Gold += gains.Gold;
+
+            return new PickupResult(hero, gains);
+        }
+
+        public DrinkPotionResult DrinkPotion()
+        {
+            Hero hero = new Hero(this);
+            bool usedPotion = false;
+
+            if (hero.Potions > 0)
+            {
+                hero.Potions--;
+                hero.Hp = hero.MaxHp;
+                usedPotion = true;
+            }
+
+            return new DrinkPotionResult(hero, usedPotion);
         }
     }
 }
