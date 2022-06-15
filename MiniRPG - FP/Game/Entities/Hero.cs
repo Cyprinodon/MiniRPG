@@ -149,6 +149,12 @@ namespace MiniRPG.Game.Entities
             return new LoseXpResult(hero, xpLost);
         }
 
+        /// <summary>
+        /// Méthode permettant de soigner le héros et calculer ne nombre de points de vie rendus.
+        /// </summary>
+        /// <param name="healingRatio">Taux de soin appliqué à la barre de vie. 
+        /// <para><remark>La valeur doit être comprise entre <c>0</c> et <c>1</c>.</remark></para></param>
+        /// <returns><see cref="HealResult"/></returns>
         public HealResult Heal(double healingRatio)
         {
             Hero hero = new Hero(this);
@@ -163,6 +169,11 @@ namespace MiniRPG.Game.Entities
             return new HealResult(hero, healAmount);
         }
 
+        /// <summary>
+        /// Méthode permettant de construire un nouvel objet héros et de le mettre à jour sur la base d'un objet fighter et du héros d'origine.
+        /// </summary>
+        /// <param name="state">instance de <see cref="Fighter"/> dont le nouveau <see cref="Hero"/> doit récupérer les valeurs.</param>
+        /// <returns><see cref="Hero"/></returns>
         public Hero Update(Fighter state)
         {
             return new Hero(this)
