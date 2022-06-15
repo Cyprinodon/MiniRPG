@@ -81,6 +81,12 @@ namespace MiniRPG.Game.Entities
             HasFled = state.HasFled;
         }
 
+        /// <summary>
+        /// Méthode permettant au <see cref="Hero"/> de récupérer le contenu d'un objet <see cref="Loot"/>.
+        /// </summary>
+        /// <param name="loot">Le butin à ramasser.</param>
+        /// <returns><see cref="PickupResult"/> : Un <see langword="struct"/> contenant le nouvel état 
+        /// de <see cref="Hero"/> ainsi que le <see cref="Loot"/> effectivement obtenu.</returns>
         public PickupResult PickUp(Loot loot)
         {
             Hero hero = new Hero(this);
@@ -98,6 +104,10 @@ namespace MiniRPG.Game.Entities
             return new PickupResult(hero, gains);
         }
 
+        /// <summary>
+        /// Méthode permettant au <see cref="Hero"/> de boire une potion.
+        /// </summary>
+        /// <returns><see cref="DrinkPotionResult"/></returns>
         public DrinkPotionResult DrinkPotion()
         {
             Hero hero = new Hero(this);
@@ -111,6 +121,59 @@ namespace MiniRPG.Game.Entities
             }
 
             return new DrinkPotionResult(hero, usedPotion);
+        }
+
+        /// <summary>
+        /// Méthode permettant de calculer le nombre points d'expérience perdu.
+        /// <para>
+        /// <remark><i>Calcule le taux à l'aide de la variable <see cref="Data.XP_LOSS_STRENGTH"/>. 
+        /// Contrainte entre <c>0</c> et <c>1</c>, la variable détermine le pourcentage de la barre d'expérience 
+        /// qui sera retiré.</i></remark>
+        /// </para>
+        /// </summary>
+        /// <returns><see cref="LoseXpResult"/></returns>
+        public LoseXpResult LoseXp()
+        {
+            Hero hero = new Hero(this);
+
+            int maxXpLost = hero.LevelThreshold / Data.XP_LOSS_STRENGTH;
+            int xpLost = hero.Xp - maxXpLost;
+
+            if (xpLost < 0)
+            {
+                xpLost = maxXpLost - Math.Abs(xpLost);
+            }
+
+            hero.Xp -= xpLost;
+
+            return new LoseXpResult(hero, xpLost);
+        }
+
+        public HealResult Heal(double healingRatio)
+        {
+            Hero hero = new Hero(this);
+            int healAmount = (int)Math.Floor(hero.MaxHp * healingRatio);
+            hero.Hp += healAmount;
+            if (hero.Hp > hero.MaxHp)
+            {
+                int rest = hero.Hp - hero.MaxHp;
+                hero.Hp = hero.MaxHp;
+                healAmount -= rest;
+            }
+            return new HealResult(hero, healAmount);
+        }
+
+        public Hero Update(Fighter state)
+        {
+            return new Hero(this)
+            {
+                Name = state.Name,
+                MaxHp = state.MaxHp,
+                Hp = state.Hp,
+                Power = state.Power,
+                Xp = state.Xp,
+                Gold = state.Gold
+            };
         }
     }
 }

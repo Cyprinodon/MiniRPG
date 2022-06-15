@@ -60,27 +60,106 @@ namespace MiniRPG.Game
             Structs.AttackResult attackResult = state.Hero.Attack(state.Monster);
 
             //Mise à jour du monstre.
-            state.Monster = (Monster)attackResult.Target;
+            state.Monster = state.Monster.Update(attackResult.Target);
 
             //Conception du rapport d'événement.
             string attackLog = $"{state.Hero.Name} décide d'attaquer le {state.Monster.Name} en le frappant de son épée." +
-                            $"\n{state.Monster.Name} perds {attackResult.Dammage} points de vie.";
+                            $"\nLe {state.Monster.Name} perds {attackResult.Dammage} points de vie.";
 
             if (state.Monster.IsDead) //Le monstre a t-il été tué ?
             {
-                attackLog += $"\n{state.Monster.Name} meurt de ses blessures.";
+                attackLog += $"\nLe {state.Monster.Name} meurt de ses blessures.";
                 state.IsDone = true; //Le combat est terminé.
             }
             else
             {
                 attackLog += $" Il lui en reste {state.Monster.Hp}." +
-                             $"\n{state.Monster.Name} est toujours en vie !";
+                             $"\nLe {state.Monster.Name} est toujours en vie !";
+
+                attackResult = state.Monster.Attack(state.Hero);
+                state.Hero = state.Hero.Update(attackResult.Target);
+
+                attackLog += $"\n\nLe {state.Monster.Name} ripose vicieusement ! " +
+                             $"\n{state.Hero.Name} perds {attackResult.Dammage} points de vie.";
+            }
+
+            if(state.Hero.IsDead)
+            {
+                attackLog += $"\n{state.Hero.Name} meurt de ses blessures.";
+            }
+            else
+            {
+                attackLog += $" Il lui en reste {state.Hero.Hp}.";
             }
 
             state.Turn++; //Mise à jour du compteur de tours.
 
             //Ecriture du rapport dans la console.
             Console.WriteLine(attackLog);
+
+            return state;
+        }
+
+        public Battle DoPlayerFlee()
+        {
+            //Création des combattants à partir de leur état précédent.
+            Battle state = new Battle(this);
+
+            string actionLog = "";
+
+            double flightChances;
+            double flightAttempt;
+
+            Random randomizer = new Random();
+
+            if (state.Monster.Hp >= state.Monster.MaxHp * 0.75)
+            {
+                flightChances = 0.5;
+            }
+            else if (state.Monster.Hp >= state.Monster.MaxHp * 0.5)
+            {
+                flightChances = 0.75;
+            }
+            else
+            {
+                flightChances = 1;
+            }
+
+            flightAttempt = randomizer.NextDouble();
+
+            if (flightAttempt <= flightChances)
+            {
+                string partialText = "";
+                Structs.LoseXpResult loseXpResult = state.Hero.LoseXp();
+                state.Hero = loseXpResult.Actor;
+                state.Hero.HasFled = true;
+
+                if (loseXpResult.XpLost > 0)
+                {
+                    partialText = $" et perds {loseXpResult.XpLost} points d'expérience";
+                }
+
+                actionLog = $"{state.Hero.Name} fuit le combat" + partialText + ".";
+            }
+            else
+            {
+                Structs.AttackResult attackResult = state.Monster.Attack(state.Hero);
+                state.Hero = state.Hero.Update(attackResult.Target);
+
+                actionLog = $"{state.Hero.Name} tente de fuir le combat mais le {state.Monster.Name} l'en empêche." +
+                            $"\n\nLe {state.Monster.Name} ripose vicieusement ! " +
+                            $"\n{state.Hero.Name} perds {attackResult.Dammage} points de vie.";
+
+                if (state.Hero.IsDead)
+                {
+                    actionLog += $"\n{state.Hero.Name} meurt de ses blessures.";
+                }
+                else
+                {
+                    actionLog += $" Il lui en reste {state.Hero.Hp}.";
+                }
+            }
+            Console.WriteLine(actionLog);
 
             return state;
         }

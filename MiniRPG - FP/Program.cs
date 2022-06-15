@@ -272,7 +272,7 @@ namespace MiniRPG
             hero.Gender = Data.GENDER_CHOICES[genderIndex];
             hero.Level = Data.HERO_STARTING_LEVEL;
             hero.Gold = Data.HERO_STARTING_GOLD;
-            hero.Hp = hero.MaxHp = Data.HERO_STARTING_HP;
+            hero.Health = Data.HERO_STARTING_HP;
             hero.Potions = Data.HERO_STARTING_POTIONS;
             hero.Power = Data.HERO_STARTING_POWER;
             hero.Xp = Data.HERO_STARTING_XP;
@@ -395,14 +395,8 @@ namespace MiniRPG
                             break;
 
                         case (int)Data.Combat.Flee:
-                            hero = resolveHeroFlight(
-                                hero,
-                                monster);
-
-                            if (!hero.HasFled)
-                            {
-                                hero = resolveMonsterAttack(hero, monster);
-                            }
+                            fight = fight.DoPlayerFlee();
+                            hero = fight.Hero;
                             break;
 
                         case (int)Data.Combat.Quit:
@@ -424,7 +418,12 @@ namespace MiniRPG
                         }
                     }
 
-                } while (!hero.GaveUp && !hero.IsDead && !monster.IsDead && !hero.HasFled);
+                    if(hero.IsDead)
+                    {
+                        return hero;
+                    }
+
+                } while (!hero.GaveUp && !monster.IsDead && !hero.HasFled);
 
                 battlesCount++;
                 hero.HasFled = false;
@@ -550,145 +549,15 @@ namespace MiniRPG
                 $"\n    Bourse : {hero.Gold} pièces d'Or.";
         }
 
-        /* Retourne la quantité de points de vie perdue par le défenseur selon la puissance de l'attaquant.
-            - attackerPower -> La puissance de l'attaquant
-            - defenderHp -> Les points de vie restant du défenseur
-           Valeur de retour :
-            - Points de vie perdus par le défenseur (0 si le défenseur n'a plus de points de vie) */
-        public static int getHpLost(int attackerPower, int defenderHp)
-        {
-            int hpLoss = attackerPower;
-
-            if (defenderHp - hpLoss < 0)
-            {
-                hpLoss = attackerPower - Math.Abs(defenderHp - attackerPower);
-            }
-
-            return hpLoss;
-        }
-
-        public static int getHpHealed(int hp, int maxHp)
-        {
-            int healAmount = (int)Math.Floor(maxHp * Data.SLEEP_HEALING_RATIO);
-            hp += healAmount;
-            if (hp > maxHp)
-            {
-                int rest = hp - maxHp;
-                healAmount -= rest;
-            }
-            return healAmount;
-        }
-
-        public static int getXpLost(int xp, int nextLevelThreshold)
-        {
-            int maxXpLost = nextLevelThreshold / Data.XP_LOSS_STRENGTH;
-            int xpLost = xp - maxXpLost;
-
-            if (xpLost < 0)
-            {
-                xpLost = maxXpLost - Math.Abs(xpLost);
-            }
-            return xpLost;
-        }
-
-        public static int resolveAttack(string[] fightersNames, int[] attackValues, string attackMean = "attaque", string deathCause = "à cause de ses blessures trop importantes")
-        {
-            string output;
-
-            string attackerName = fightersNames[0]; string victimName = fightersNames[1];
-            int attackerPower = attackValues[0]; int victimHp = attackValues[1];
-
-            int hpLost = getHpLost(attackerPower, victimHp);
-            victimHp -= hpLost;
-
-            output = $"{attackerName} {attackMean}.\n{victimName} perds {hpLost} points de vie.";
-
-            if (victimHp <= 0)
-            {
-                victimHp = 0;
-
-                output += $"\n{victimName} meurt {deathCause}.";
-            }
-            else
-            {
-                output += $" Il lui en reste {victimHp}.";
-                output += $"\n{victimName} est toujours en vie !";
-            }
-            Console.WriteLine(output);
-
-            return victimHp;
-        }
-
-        /* Enlève des points de vie au monstre selon la puissance du héros :
-            - heroName -> le Nom du héros
-            - monsterName -> le nom du monstre
-            - heroPower -> la puissance du héros
-            - monsterHp -> les points de vie du monstre
-           Valeur de retour :
-            - monsterHp -> Les points de vie restant du monstre (0 s'il est mort)*/
-        public static int resolveHeroAttack(string heroName, string monsterName, int heroPower, int monsterHp)
-        {
-            string[] names = new string[] { heroName, $"le {monsterName}" };
-            int[] attackValues = new int[] { heroPower, monsterHp };
-            string attack = $"décide d'attaquer le {monsterName} en le frappant de son épée";
-
-            monsterHp = resolveAttack(names, attackValues, attack);
-
-            return monsterHp;
-        }
-
-        public static Hero resolveMonsterAttack(Hero state, Monster monster)
-        {
-            Hero hero = new Hero(state);
-            string[] names = new string[] { $"le {monster.Name}", hero.Name };
-            int[] attackValues = new int[] { monster.Power, hero.Hp };
-
-            hero.Hp = resolveAttack(names, attackValues, "riposte vicieusement");
-
-            return hero;
-        }
-
-        /* Donne au héros le butin du monstre qu'il est en droit de recevoir :
-            - heroName -> Le nom du héros
-            - heroEssentials -> les statistiques du héros (son or, son xp, et le prérequis pour accéder au niveau suivant)
-            - gains -> l'or et l'expérience donnée par le monstre)
-           Valeur de retour :
-            - heroGains -> l'or et l'expérience que le héros va recevoir */
-        public static Hero resolveHeroGains(Hero state, Structs.Loot gains)
-        {
-            Hero hero = new Hero(state);
-
-            if (hero.Xp + gains.Xp > hero.LevelThreshold)
-            {
-                hero.Xp = hero.LevelThreshold - hero.Xp;
-            }
-            else
-            {
-                hero.Xp = gains.Xp;
-            }
-
-            hero.Gold += goldGain;
-            hero.Xp += xpGain;
-
-            Console.WriteLine($"{hero.Name} a gagné {goldGain} pièces d'or et {xpGain} points d'expérience.");
-
-            if (hero.Xp >= hero.LevelThreshold)
-            {
-                Console.WriteLine($"{hero.Name} a atteint la limite d'expérience autorisée ({hero.LevelThreshold} exp.). Dormez une fois en ville pour gagner un niveau.");
-            }
-
-            return hero;
-        }
-
         public static Hero resolveHeroSleeping(Hero state)
         {
             Hero hero = new Hero(state);
 
             if (hero.Hp < hero.MaxHp)
             {
-                int healAmount = getHpHealed(hero.Hp, hero.MaxHp);
-                hero.Hp = healAmount;
-                Console.WriteLine($"{hero.Name} récupère {healAmount} points de vie pour avoir dormi dans un lit confortable.");
+                Structs.HealResult healResult = hero.Heal(Data.SLEEP_HEALING_RATIO);
+                hero = healResult.Actor;
+                Console.WriteLine($"{hero.Name} récupère {healResult.HealAmount} points de vie pour avoir dormi dans un lit confortable.");
             }
             else
             {
@@ -706,79 +575,11 @@ namespace MiniRPG
             {
                 hero.Level++;
                 hero.Xp = 0;
-                hero.Hp = hero.MaxHp += Data.HERO_MAX_HP_INCREASE;
+                hero.Health = hero.MaxHp + Data.HERO_MAX_HP_INCREASE;
                 hero.Power += Data.HERO_POWER_INCREASE;
                 Console.WriteLine($"Avec {hero.Xp} points d'expérience accumulés, {hero.Name} passe au niveau {hero.Level}." +
                     $"\nLes points de vie de {hero.Name} passent à {hero.MaxHp}(+{Data.HERO_MAX_HP_INCREASE}) et " +
                     $"sa puissance monte à {hero.Power}(+{Data.HERO_POWER_INCREASE}).");
-            }
-
-            return hero;
-        }
-
-        public static Hero resolveHeroFlight(Hero state, Monster monster)
-        {
-            Hero hero = new Hero(state);
-            double flightChances;
-            double flightAttempt;
-
-            Random randomizer = new Random();
-
-            if (monster.Hp >= monster.MaxHp * 0.75)
-            {
-                flightChances = 0.5;
-            }
-            else if (monster.Hp >= monster.MaxHp * 0.5)
-            {
-                flightChances = 0.75;
-            }
-            else
-            {
-                flightChances = 1;
-            }
-            flightAttempt = randomizer.NextDouble();
-
-            if (flightAttempt <= flightChances)
-            {
-                string partialText = "";
-                int xpLost = getXpLost(hero.Xp, hero.LevelThreshold);
-                hero.Xp -= xpLost;
-                hero.HasFled = true;
-
-                if (xpLost > 0)
-                {
-                    partialText = $" et perds {xpLost} points d'expérience";
-                }
-
-                Console.WriteLine($"{hero.Name} fuit le combat" + partialText + ".");
-            }
-            else
-            {
-                Console.WriteLine($"{hero.Name} tente de fuir le combat mais le {monster.Name} l'en empêche.");
-            }
-
-            return hero;
-        }
-
-        public static Hero resolveHeroDrinksPotion(Hero state)
-        {
-            Hero hero = new Hero(state);
-            if (hero.Hp == hero.MaxHp)
-            {
-                Console.WriteLine($"{hero.Name} n'est pas blessé(e), boire une potion serait du pur gâchis !");
-            }
-            else
-            {
-                if (hero.Potions > 0)
-                {
-                    hero.Potions--;
-                    hero.Hp = hero.MaxHp;
-                    Console.WriteLine($"{hero.Name} boit une potion de soin. Ses blessures sont entièrement guéries !\nIl lui reste {hero.Potions} potions.");
-                }
-                else
-                {
-                    Console.WriteLine($"{hero.Name} voudrait boire une potion de soin mais n'en a pas de disponible dans son inventaire. Il va falloir penser à se refaire un stock !");
-                }
             }
 
             return hero;

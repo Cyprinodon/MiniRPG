@@ -19,6 +19,16 @@ namespace MiniRPG.Game.Entities
         public int Hp { get; protected set; } = 1;
 
         /// <value>
+        /// <see cref="Health"/> est un mutateur de type <see langword="int"/> permettant de modifier le total de points de vie (<see cref="MaxHp"/>) du combattant.
+        /// <para>
+        /// <remark>
+        /// <i>La variable <see cref="Hp"/> prends également la valeur de <see cref="MaxHp"/>.</i>
+        /// </remark>
+        /// </para>
+        /// </value>
+        public int Health { set => Hp = MaxHp = value; }
+
+        /// <value>
         /// <see cref="MaxHp"/> est une propriété de type <see langword="int"/> représentant les points de vie maximum 
         /// du combattants.
         /// </value>
@@ -126,7 +136,12 @@ namespace MiniRPG.Game.Entities
         /// <returns>Dégâts(<see langword="int"/>) infligés au combattant.</returns>
         public int LoseHp(int attackPower)
         {
-            int dammage = attackPower - Math.Abs(Hp - attackPower);
+            int dammage = attackPower;
+
+            if (Hp - attackPower <= 0)
+            {
+                dammage = attackPower - Math.Abs(Hp - attackPower);
+            }
             Hp -= dammage;
 
             return dammage; 

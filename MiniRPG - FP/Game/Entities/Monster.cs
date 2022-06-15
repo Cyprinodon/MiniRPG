@@ -22,5 +22,18 @@
             Gold = state.Gold;
             Xp = state.Xp;
         }
+
+        public Monster Update(Fighter state)
+        {
+            return new Monster(this)
+            {
+                Name = state.Name,
+                MaxHp = state.MaxHp,
+                Hp = state.Hp,
+                Power = state.Power,
+                Xp = state.Xp,
+                Gold = state.Gold
+            };
+        }
     }
 }
