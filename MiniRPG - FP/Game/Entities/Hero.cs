@@ -17,7 +17,7 @@ namespace MiniRPG.Game.Entities
         /// <value>
         /// <see cref="Gender"/> est une propriété de type <see cref="Structs.Gender"/> représentant le genre du héros.
         /// </value>
-        public Gender Gender { get; set; } = Data.GENDER_CHOICES[0];
+        public Gender Gender { get; set; } = Data.GENDERS[0];
 
         /// <value>
         /// <see cref="Level"/> est une propriété de type <see langword="int"/> représentant le niveau du héros. 
