@@ -1,6 +1,6 @@
-﻿using MiniRPG.Game.Entities;
+﻿using MiniRPG.Entities;
 
-namespace MiniRPG.Game.Structs
+namespace MiniRPG.Structs
 {
     /// <summary>
     /// Le résultat d'une attaque d'un combattant sur un autre.

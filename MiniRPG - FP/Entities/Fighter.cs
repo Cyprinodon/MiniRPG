@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MiniRPG.Game.Entities
+namespace MiniRPG.Entities
 {
     /// <summary>
     /// La classe de base de toute entité capable d'attaquer et recevoir des dégats.

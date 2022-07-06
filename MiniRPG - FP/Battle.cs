@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using MiniRPG.Game.Entities;
+using MiniRPG.Entities;
 
-namespace MiniRPG.Game
+namespace MiniRPG
 {
     class Battle
     {
@@ -40,7 +40,7 @@ namespace MiniRPG.Game
 
             //Récupération de la clef associée.
             string chosenKey = keys[randomIndex];
-            
+
             //Obtention du modèle de monstre à partir de la clef.
             Structs.Monster monsterTemplate = monsterTemplates[chosenKey];
 
@@ -83,7 +83,7 @@ namespace MiniRPG.Game
                              $"\n{state.Hero.Name} perds {attackResult.Dammage} points de vie.";
             }
 
-            if(state.Hero.IsDead)
+            if (state.Hero.IsDead)
             {
                 attackLog += $"\n{state.Hero.Name} meurt de ses blessures.";
             }
@@ -168,11 +168,11 @@ namespace MiniRPG.Game
         {
             Battle state = new Battle(this);
 
-            if(state.Hero.IsFullHealth)
+            if (state.Hero.IsFullHealth)
             {
                 Console.WriteLine($"{state.Hero.Name} n'est pas blessé(e), boire une potion serait du pur gâchis !");
             }
-            else if(state.Hero.Potions <= 0)
+            else if (state.Hero.Potions <= 0)
             {
                 Console.WriteLine($"{state.Hero.Name} voudrait boire une potion de soin mais n'en a pas de disponible dans son inventaire. Il va falloir penser à se refaire un stock !");
             }

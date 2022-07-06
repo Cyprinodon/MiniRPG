@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MiniRPG.Game.Structs
+namespace MiniRPG.Structs
 {
     struct Monster
     {

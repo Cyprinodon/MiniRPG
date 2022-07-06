@@ -1,4 +1,4 @@
-﻿namespace MiniRPG.Game.Entities
+﻿namespace MiniRPG.Entities
 {
     /// <summary>
     /// Une entité capable d'attaquer et de lâcher un butin à sa mort.

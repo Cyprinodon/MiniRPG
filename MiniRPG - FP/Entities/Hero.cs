@@ -1,7 +1,7 @@
-﻿using MiniRPG.Game.Structs;
+﻿using MiniRPG.Structs;
 using System;
 
-namespace MiniRPG.Game.Entities
+namespace MiniRPG.Entities
 {
     /// <summary>
     /// Une entité capable de monter en niveau, attaquer, fuir, boire des potions et se reposer.

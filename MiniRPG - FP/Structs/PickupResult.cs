@@ -1,9 +1,9 @@
-﻿using MiniRPG.Game.Entities;
+﻿using MiniRPG.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace MiniRPG.Game.Structs
+namespace MiniRPG.Structs
 {
     struct PickupResult
     {

@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using MiniRPG.Game;
-using MiniRPG.Game.Entities;
-using Structs = MiniRPG.Game.Structs;
+using MiniRPG.Entities;
+using Structs = MiniRPG.Structs;
 
 namespace MiniRPG
 {
-    class GameFP
+    class Game
     {
         static void Main(string[] args)
         {

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Key = System.ConsoleKey;
 
-namespace MiniRPG.Game
+namespace MiniRPG
 {
     static class Data
     {
@@ -39,12 +39,12 @@ namespace MiniRPG.Game
         public static readonly double POTION_POTENCY = 1.0f;
 
         //L'expérience à accumuler pour atteindre chaque niveau
-        public static  readonly int[] LEVEL_THRESHOLDS = new int[]
+        public static readonly int[] LEVEL_THRESHOLDS = new int[]
         {
                 30, 60, 90, 120, 150, 180, 210, 240, 300
         };
 
-        public static Structs.Gender[] GENDERS = new Structs.Gender[] 
+        public static Structs.Gender[] GENDERS = new Structs.Gender[]
         {
             new Structs.Gender("H", "Un", "Homme"),
             new Structs.Gender("F", "Une", "Femme")
