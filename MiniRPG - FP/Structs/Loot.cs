@@ -1,4 +1,4 @@
-﻿namespace MiniRPG.Game.Structs
+﻿namespace MiniRPG.Structs
 {
     /// <summary>
     /// Représente le butin lâché par un monstre vaincu.

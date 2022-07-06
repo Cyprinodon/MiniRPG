@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using Key = System.ConsoleKey;
 
-namespace MiniRPG.Game
+namespace MiniRPG
 {
     static class Data
     {
@@ -38,15 +39,21 @@ namespace MiniRPG.Game
         public static readonly double POTION_POTENCY = 1.0f;
 
         //L'expérience à accumuler pour atteindre chaque niveau
-        public static  readonly int[] LEVEL_THRESHOLDS = new int[]
+        public static readonly int[] LEVEL_THRESHOLDS = new int[]
         {
                 30, 60, 90, 120, 150, 180, 210, 240, 300
         };
 
-        public static Structs.Gender[] GENDER_CHOICES = new Structs.Gender[] 
+        public static Structs.Gender[] GENDERS = new Structs.Gender[]
         {
             new Structs.Gender("H", "Un", "Homme"),
             new Structs.Gender("F", "Une", "Femme")
+        };
+
+        public static Structs.Input[] GENDER_CHOICES = new Structs.Input[]
+        {
+            new Structs.Input(Key.H, GENDERS[0].Article + " " + GENDERS[0].Name),
+            new Structs.Input(Key.F, GENDERS[1].Article + " " + GENDERS[1].Name)
         };
 
         public static Dictionary<string, Structs.Monster> MONSTERS = new Dictionary<string, Structs.Monster>()
@@ -57,6 +64,23 @@ namespace MiniRPG.Game
             { "skeleton", new Structs.Monster("Squelette", 80, 15, 32, 12) },
             { "demon", new Structs.Monster("Démon", 120, 30, 64, 28) },
             { "dragon", new Structs.Monster("Dragon", 250, 50, 128, 55) }
+        };
+
+        public static Structs.Input[] COMBAT_CHOICES = new Structs.Input[]
+        {
+            new Structs.Input(Key.I,"Informations sur le personnage"),
+            new Structs.Input(Key.A, "Attaquer"),
+            new Structs.Input(Key.P, "Boire une Potion"),
+            new Structs.Input(Key.F, "Fuir"),
+            new Structs.Input(Key.Escape, "Quitter")
+        };
+
+        public static Structs.Input[] REST_CHOICES = new Structs.Input[]
+        {
+            COMBAT_CHOICES[0],
+            new Structs.Input(Key.D, "Dormir"),
+            new Structs.Input(Key.P, "Acheter des Potions"),
+            COMBAT_CHOICES[4]
         };
     }
 }

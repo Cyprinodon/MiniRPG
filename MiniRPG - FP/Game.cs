@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using MiniRPG.Game;
-using MiniRPG.Game.Entities;
-using Structs = MiniRPG.Game.Structs;
+using MiniRPG.Entities;
+using Structs = MiniRPG.Structs;
 
 namespace MiniRPG
 {
-    class GameFP
+    class Game
     {
         static void Main(string[] args)
         {
@@ -239,17 +238,9 @@ namespace MiniRPG
             string defaultName;
             bool confirmed;
 
-            /* Si l'on souhaite étendre le nombre de genres, 
-             * toujours ajouter l'article - soit un ou une -
-             * sinon, l'extraction du genre sera erronnée. */
-            string[][] genderChoices = new string[][] {
-                new string[] { "h", Data.GENDER_CHOICES[0].Article + " " + Data.GENDER_CHOICES[0].Name },
-                new string[] { "f", Data.GENDER_CHOICES[1].Article + " " + Data.GENDER_CHOICES[1].Name },
-            };
-
             do
             {
-                genderIndex = askForChoice(genderChoices, "Êtes-vous");
+                genderIndex = askForChoice(Data.GENDER_CHOICES, "Êtes-vous");
                 confirmed = (bool)askForConfirmation();
             } while (!confirmed);
 
@@ -269,7 +260,7 @@ namespace MiniRPG
             Console.WriteLine($"Vous êtes un(e) {hero.Title} en quête d'aventures.");
 
             hero.Name = askForHeroName(defaultName, genderIndex);
-            hero.Gender = Data.GENDER_CHOICES[genderIndex];
+            hero.Gender = Data.GENDERS[genderIndex];
             hero.Level = Data.HERO_STARTING_LEVEL;
             hero.Gold = Data.HERO_STARTING_GOLD;
             hero.Health = Data.HERO_STARTING_HP;
@@ -287,35 +278,32 @@ namespace MiniRPG
             - customMessage -> Le message demandant de faire un choix
            Valeur de retour :
             - userChoice -> un nombre entier symbolisant le choix de l'utilisateur*/
-        public static int askForChoice(string[][] choices, string customMessage = "Faites un choix")
+        public static int askForChoice(Structs.Input[] choices, string customMessage = "Faites un choix")
         {
             int userChoice = -1;
             bool valid = false;
-            string userInput;
+            ConsoleKey userInput;
             string warning = null;
 
             customMessage += " :\n";
-
+            
             // On génère l'affichage du choix
-            foreach (string[] choice in choices)
+            foreach (var choice in choices)
             {
-                string choiceKey = choice[0];
-                string choiceLabel = choice[1];
-
-                customMessage += $"    {choiceKey} -> {choiceLabel}\n";
+                customMessage += $"    {choice.Label} -> {choice.Description}\n";
             }
 
             do
             {
                 Console.Write(warning + customMessage);
-                userInput = Console.ReadKey(true).Key.ToString();
-                userInput = userInput.ToLower();
-                Console.WriteLine(userInput);
+                userInput = Console.ReadKey(true).Key;
+                string input = userInput.ToString().ToLower();
+                Console.WriteLine(input);
 
                 //On cherche une correspondance dans la liste des choix
                 for (int i = 0; i < choices.Length; i++)
                 {
-                    string choiceKey = choices[i][0].ToLower();
+                    ConsoleKey choiceKey = choices[i].Key;
                     if (userInput == choiceKey)
                     {
                         valid = true;
@@ -326,7 +314,7 @@ namespace MiniRPG
                 // Si on ne la trouve pas après voir parcouru le tableau, c'est que la saisie n'est pas bonne
                 if (!valid)
                 {
-                    warning = $"'{userInput}' n'est pas la saisie attendue. Saisissez une lettre parmi celles proposées.\n";
+                    warning = $"'{input}' n'est pas la saisie attendue. Saisissez une lettre parmi celles proposées.\n";
                 }
             } while (!valid);
 
@@ -343,16 +331,6 @@ namespace MiniRPG
         public static Hero manageCombatPhase(Hero state)
         {
             Hero hero = new Hero(state);
-
-            // La liste des choix que le joueur peut faire en combat
-            string[][] combatChoices = new string[][]
-            {
-                new string[] { "i", "Informations sur le personnage"},
-                new string[] { "a", "Attaquer" },
-                new string[] { "p", "Boire une Potion"},
-                new string[] { "f", "Fuir" },
-                new string[] { "escape", "Quitter" }
-            };
 
             //Variables du héros
             int playerChoice;
@@ -373,7 +351,7 @@ namespace MiniRPG
                 // Afficher les actions disponibles pour le joueur
                 do
                 {
-                    playerChoice = askForChoice(combatChoices, $"====================================\n" +
+                    playerChoice = askForChoice(Data.COMBAT_CHOICES, $"====================================\n" +
                         $"Face à ce dangereux {monster.Name}, {hero.Name} doit déterminer sa prochaine action");
                     // Résoudre l'action du joueur
                     switch (playerChoice)
@@ -443,15 +421,6 @@ namespace MiniRPG
         {
             Hero hero = new Hero(state);
 
-            // La liste des choix que le joueur peut faire au repos
-            string[][] restChoices = new string[][]
-            {
-                new string[] { "i", "Informations sur le personnage"},
-                new string[] { "d", "Dormir" },
-                new string[] { "p", "Acheter des Potions"},
-                new string[] { "escape", "Quitter" }
-            };
-
             bool done = false;
 
             //Variables du héros
@@ -460,7 +429,7 @@ namespace MiniRPG
             Console.WriteLine($"{hero.Name} entre en ville.");
             do
             {
-                playerChoice = askForChoice(restChoices, $"====================================\n" +
+                playerChoice = askForChoice(Data.REST_CHOICES, $"====================================\n" +
                             $"Enfin au calme ! {hero.Name} peut effectuer une de ces actions");
                 // Résoudre l'action du joueur
                 switch (playerChoice)

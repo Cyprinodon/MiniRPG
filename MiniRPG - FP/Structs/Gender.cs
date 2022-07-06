@@ -1,4 +1,4 @@
-﻿namespace MiniRPG.Game.Structs
+﻿namespace MiniRPG.Structs
 {
     struct Gender
     {
