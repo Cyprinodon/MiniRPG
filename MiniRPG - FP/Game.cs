@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using MiniRPG.Entities;
-using Structs = MiniRPG.Structs;
+using MiniRPG.TextInterfaces.Prompts;
 
 namespace MiniRPG
 {
@@ -180,10 +179,13 @@ namespace MiniRPG
         {
             int itemCount;
             bool confirmed;
+            
+            IntPrompt prompt = new IntPrompt(message, 0, maxCount);
+            ConfirmationPrompt confirmation = new ConfirmationPrompt();
             do
             {
-                itemCount = askForInput(message, 0, maxCount);
-                confirmed = (bool)askForConfirmation();
+                itemCount = prompt.AskForInput();
+                confirmed = (bool)confirmation.AskForInput();
             } while (!confirmed);
 
             return itemCount;
@@ -200,6 +202,9 @@ namespace MiniRPG
             string playerTitle;
             bool confirmed;
 
+            StringPrompt prompt = new StringPrompt("Entrez votre nom", 25);
+            ConfirmationPrompt confirmation = new ConfirmationPrompt();
+
             if (gender == (int)Data.Gender.Female)
             {
                 playerTitle = "héroïne";
@@ -211,9 +216,9 @@ namespace MiniRPG
 
             do
             {
-                playerName = askForInput("Entrez votre nom", 25);
+                playerName = prompt.AskForInput();
                 playerName = playerName.Trim();
-                confirmed = (bool)askForConfirmation();
+                confirmed = (bool)confirmation.AskForInput();
 
             } while (!confirmed);
 
@@ -238,10 +243,12 @@ namespace MiniRPG
             string defaultName;
             bool confirmed;
 
+            ChoicePrompt prompt = new ChoicePrompt("Êtes-vous", Data.GENDER_CHOICES);
+            ConfirmationPrompt confirmation = new ConfirmationPrompt();
             do
             {
-                genderIndex = askForChoice(Data.GENDER_CHOICES, "Êtes-vous");
-                confirmed = (bool)askForConfirmation();
+                genderIndex = prompt.AskForInput();
+                confirmed = (bool)confirmation.AskForInput();
             } while (!confirmed);
 
             switch (genderIndex)
@@ -332,6 +339,9 @@ namespace MiniRPG
         {
             Hero hero = new Hero(state);
 
+            ChoicePrompt prompt = new ChoicePrompt(null, Data.COMBAT_CHOICES);
+            ConfirmationPrompt quitPrompt = new ConfirmationPrompt("Êtes-vous sûr(e) de vouloir quitter ?");
+
             //Variables du héros
             int playerChoice;
 
@@ -351,8 +361,10 @@ namespace MiniRPG
                 // Afficher les actions disponibles pour le joueur
                 do
                 {
-                    playerChoice = askForChoice(Data.COMBAT_CHOICES, $"====================================\n" +
-                        $"Face à ce dangereux {monster.Name}, {hero.Name} doit déterminer sa prochaine action");
+                    prompt.Message = $"====================================\n" +
+                        $"Face à ce dangereux {monster.Name}, {hero.Name} doit déterminer sa prochaine action";
+
+                    playerChoice = prompt.AskForInput();
                     // Résoudre l'action du joueur
                     switch (playerChoice)
                     {
@@ -378,7 +390,7 @@ namespace MiniRPG
                             break;
 
                         case (int)Data.Combat.Quit:
-                            hero.GaveUp = (bool)askForConfirmation("Êtes-vous sûr(e) de vouloir quitter ?");
+                            hero.GaveUp = (bool)quitPrompt.AskForInput();
                             break;
                     }
 
@@ -421,6 +433,9 @@ namespace MiniRPG
         {
             Hero hero = new Hero(state);
 
+            ChoicePrompt prompt = new ChoicePrompt(null, Data.REST_CHOICES);
+            ConfirmationPrompt quitPrompt = new ConfirmationPrompt();
+
             bool done = false;
 
             //Variables du héros
@@ -429,8 +444,10 @@ namespace MiniRPG
             Console.WriteLine($"{hero.Name} entre en ville.");
             do
             {
-                playerChoice = askForChoice(Data.REST_CHOICES, $"====================================\n" +
-                            $"Enfin au calme ! {hero.Name} peut effectuer une de ces actions");
+                prompt.Message = $"====================================\n" +
+                            $"Enfin au calme ! {hero.Name} peut effectuer une de ces actions";
+                playerChoice = prompt.AskForInput();
+
                 // Résoudre l'action du joueur
                 switch (playerChoice)
                 {
@@ -477,7 +494,7 @@ namespace MiniRPG
                         done = true;
                         break;
                     case (int)Data.Rest.Quit:
-                        hero.GaveUp = (bool)askForConfirmation("Êtes-vous sûr(e) de vouloir quitter ?");
+                        hero.GaveUp = (bool)quitPrompt.AskForInput();
                         break;
                 }
             } while (!hero.GaveUp && !done);
