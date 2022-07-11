@@ -87,7 +87,7 @@ namespace MiniRPG
             {
                 attackLog += $"\n{state.Hero.Name} meurt de ses blessures.";
             }
-            else
+            else if (!state.Monster.IsDead)
             {
                 attackLog += $" Il lui en reste {state.Hero.Hp}.";
             }
