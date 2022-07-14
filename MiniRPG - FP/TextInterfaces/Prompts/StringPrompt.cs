@@ -6,7 +6,7 @@ namespace MiniRPG.TextInterfaces.Prompts
     {
         public override string Message
         {
-            get => InputLimit > 0 ? $"{_Message}(max. {InputLimit}):" : Message + ":";
+            get => InputLimit > 0 ? $"{_Message}(max. {InputLimit}):\n" : Message + ":\n";
             set => _Message = value;
         }
 
@@ -19,7 +19,9 @@ namespace MiniRPG.TextInterfaces.Prompts
 
         protected override void ReadInput()
         {
+            Console.Write("> ");
             UserInput = Console.ReadLine();
+            Console.Write("\n");
         }
 
         protected override bool CheckInput(out string result)

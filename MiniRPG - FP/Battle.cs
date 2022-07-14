@@ -46,7 +46,7 @@ namespace MiniRPG
 
             //Instanciation du monstre à partir du modèle.
             Monster = new Monster(monsterTemplate);
-            Console.WriteLine($"Un {Monster.Name} apparait !\nIl possède {Monster.MaxHp} points de vie et ses attaques infligent {Monster.Power} points de dégâts.");
+            Console.WriteLine($"Un {Monster.Name} apparait !\nIl possède {Monster.MaxHp} points de vie et ses attaques infligent {Monster.Power} points de dégâts.\n");
 
             return Monster;
         }
@@ -64,7 +64,7 @@ namespace MiniRPG
 
             //Conception du rapport d'événement.
             string attackLog = $"{state.Hero.Name} décide d'attaquer le {state.Monster.Name} en le frappant de son épée." +
-                            $"\nLe {state.Monster.Name} perds {attackResult.Dammage} points de vie.";
+                            $"\nLe {state.Monster.Name} perd {attackResult.Dammage} points de vie.";
 
             if (state.Monster.IsDead) //Le monstre a t-il été tué ?
             {
@@ -79,8 +79,8 @@ namespace MiniRPG
                 attackResult = state.Monster.Attack(state.Hero);
                 state.Hero = state.Hero.Update(attackResult.Target);
 
-                attackLog += $"\n\nLe {state.Monster.Name} ripose vicieusement ! " +
-                             $"\n{state.Hero.Name} perds {attackResult.Dammage} points de vie.";
+                attackLog += $"\n\nLe {state.Monster.Name} riposte vicieusement ! " +
+                             $"\n{state.Hero.Name} perd {attackResult.Dammage} points de vie.";
             }
 
             if (state.Hero.IsDead)
@@ -95,7 +95,7 @@ namespace MiniRPG
             state.Turn++; //Mise à jour du compteur de tours.
 
             //Ecriture du rapport dans la console.
-            Console.WriteLine(attackLog);
+            Console.WriteLine(attackLog + "\n");
 
             return state;
         }
@@ -136,7 +136,7 @@ namespace MiniRPG
 
                 if (loseXpResult.XpLost > 0)
                 {
-                    partialText = $" et perds {loseXpResult.XpLost} points d'expérience";
+                    partialText = $" et perd {loseXpResult.XpLost} points d'expérience.";
                 }
 
                 actionLog = $"{state.Hero.Name} fuit le combat" + partialText + ".";
@@ -148,7 +148,7 @@ namespace MiniRPG
 
                 actionLog = $"{state.Hero.Name} tente de fuir le combat mais le {state.Monster.Name} l'en empêche." +
                             $"\n\nLe {state.Monster.Name} ripose vicieusement ! " +
-                            $"\n{state.Hero.Name} perds {attackResult.Dammage} points de vie.";
+                            $"\n{state.Hero.Name} perd {attackResult.Dammage} points de vie.";
 
                 if (state.Hero.IsDead)
                 {
@@ -159,7 +159,7 @@ namespace MiniRPG
                     actionLog += $" Il lui en reste {state.Hero.Hp}.";
                 }
             }
-            Console.WriteLine(actionLog);
+            Console.WriteLine(actionLog + "\n");
 
             return state;
         }

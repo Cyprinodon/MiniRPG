@@ -7,7 +7,7 @@ namespace MiniRPG.TextInterfaces.Prompts
     {
         public override string Message
         {
-            get { return $"{_Message}\n {Yes}\n {No}"; }
+            get { return $"{_Message}\n {Yes}\n {No}\n"; }
         }
         public Input Yes;
         public Input No;

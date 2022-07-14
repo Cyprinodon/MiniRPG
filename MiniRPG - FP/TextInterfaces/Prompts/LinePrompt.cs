@@ -13,6 +13,7 @@ namespace MiniRPG.TextInterfaces.Prompts
 
         protected override void ReadInput()
         {
+            Console.Write("> ");
             string input = Console.ReadLine();
             UserInput = (T)Convert.ChangeType(input, typeof(T));
         }

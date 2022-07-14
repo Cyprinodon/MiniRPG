@@ -15,11 +15,12 @@ namespace MiniRPG.TextInterfaces.Prompts
 
         protected override void ReadInput()
         {
+            Console.Write("> ");
             UserInput = Console.ReadKey(true).Key;
 
             string label = Converter.KeyToString(UserInput);
 
-            Console.WriteLine(label);
+            Console.WriteLine(label + "\n");
         }
     }
 }
