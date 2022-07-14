@@ -9,7 +9,7 @@ namespace MiniRPG
         public Hero Hero;
         public Monster Monster;
         public bool IsDone = false;
-        protected int Turn = 1;
+        public int Turn { get; protected set; } = 1;
         public Battle(Hero state)
         {
             Hero = new Hero(state);

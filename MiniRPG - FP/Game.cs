@@ -48,13 +48,13 @@ namespace MiniRPG
                 }
                 else if (hero.IsDead)
                 {
-                    closeConsole("==========================================" +
+                    closeConsole("=DEFAITE==================================" +
                                  "\nVous n'avez pas su garder votre héros en vie, c'est la FIN DE LA PARTIE." +
                                  "\n(Ce jeu est INJUSTE, je sais...)");
                 }
                 else if (hero.HasWon)
                 {
-                    closeConsole("========================================== " +
+                    closeConsole("=VICTOIRE================================= " +
                                  "\nBravo ! Vous avez atteint le dernier niveau et complété le jeu, c'est la FIN DE LA PARTIE.\nMerci d'avoir joué.");
                 }
             } while (running);
@@ -192,7 +192,7 @@ namespace MiniRPG
             }
 
             return $"{hero.Name} regarde sa feuille de personnage :" +
-                $"\n____{hero.Name.ToUpper()}____" +
+                $"\n={hero.Name.ToUpper()}=====================" +
                 $"\n    Un(e) {hero.Title} de niveau {hero.Level}." +
                 levelOutput +
                 $"\n    Puissance d'attaque : {hero.Power}" +

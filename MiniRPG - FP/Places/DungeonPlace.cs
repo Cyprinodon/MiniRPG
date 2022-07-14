@@ -29,7 +29,8 @@ namespace MiniRPG.Places
 
             do
             {
-                prompt.Message = $"====================================\n" +
+                string turnCount = fight.Turn.ToString();
+                prompt.Message = $"=TOUR {turnCount}==============================\n" +
                     $"Face à ce dangereux {Monster.Name}, {Hero.Name} doit déterminer sa prochaine action";
 
                 int playerChoice = prompt.AskForInput();
